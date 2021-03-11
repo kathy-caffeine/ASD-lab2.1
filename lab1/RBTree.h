@@ -8,19 +8,10 @@ template <typename T>
 class RBTree
 {
 private:
-	RBTree() {
-		root = nullptr;
-	};
-
-	~RBTree() {
-		clear();
-		delete root;
-	};
-
 	class RBNode
 	{
 	public:
-		RBNode(T data, T key) {
+		RBNode(T data, T key, bool color, RBNode* parent, RBNode* left, RBNode* right) {
 			this->data = data;
 			this->key = key;
 			this->parent = nullptr;
@@ -28,9 +19,7 @@ private:
 			this->right = nullptr;
 			this->color = true; // red
 		};
-		~RBNode() {
-			delete;
-		};
+		~RBNode() {};
 		T data;
 		T key;
 		RBNode* parent;
@@ -79,16 +68,29 @@ private:
 	};
 
 	void set_root(T key, T data) {
-		RBNode* tmp = new RBNode(data, key);
+		RBNode* tmp = new RBNode(data, key, false, nil, nil, nil);
 		root = tmp;
-		root->parent = nill;
+		root->parent = nil;
+		root->color = false; // black root's color
+		nil->color = false; // black nill's color
 	};
 
 	RBNode* root;
-	RBNode* nill = new RBNode("", "");
-	nill->color = false; // black nill's color
+	RBNode* nil = new RBNode(0, 0, false, nil, nil, nil);
+	size_t size;
 
 public:
+	RBTree() {
+		root = nil;
+		size = 0;
+	};
+
+	~RBTree() {
+		clear();
+		delete root;
+		size = 0;
+	};
+
 	void left(RBNode* newNode) {
 		if (newNode->right == nullptr)
 			return;
@@ -147,7 +149,7 @@ public:
 		}
 	};
 
-	void coloring(RBNode node) {
+	void coloring(RBNode* node) {
 		if (node == root)
 		{
 			node->color = false;
@@ -206,10 +208,10 @@ public:
 	void insert(T key, T data) {
 		if (root == nil) // add root
 		{
-			root = new RBNode(insKey, insValue, false, nil, nil, nil);
+			root = new RBNode(key, data, false, nil, nil, nil);
 		}
 		else {
-			RBNode* newNode = new Node(insKey, insValue, true, nil, nil, nil);
+			RBNode* newNode = new RBNode(key, data, true, nil, nil, nil);
 			RBNode* parent = root;
 			RBNode* leaf = nullptr;
 			while (parent != nil)
@@ -227,11 +229,12 @@ public:
 				leaf->left = newNode;
 			coloring(newNode);
 		}
+		size++;
 	};
 
 	RBNode* find(T key) {
-		RBNode x = root;
-		while ((x != nullptr) && (key != x->key)) {
+		RBNode* x = root;
+		while ((x != nullptr) || (key != x->key)) {
 			if (x->key > key) {
 				x = x->left;
 			}
@@ -239,8 +242,7 @@ public:
 				x = x->right;
 			}
 		}
-		if (x != nullptr) return x;
-		return nullptr;
+		return x;
 	};
 
 	void fix(RBNode* node) {
@@ -314,6 +316,9 @@ public:
 
 	void remove(T remKey) {
 		RBNode* node = find(remKey);
+		if (node == nullptr) return; // if there is no such node we cant delete it
+		// if we had node, we can delete it
+		size--;
 		RBNode* nodeA;
 		RBNode* nodeB;
 		if ((node->left == nil) || (node->right == nil)) // if node has <2 children
@@ -347,11 +352,11 @@ public:
 		if (nodeA != node)
 		{
 			node->key = nodeA->key;
-			node->value = nodeA->value;
+			node->data = nodeA->data;
 		}
 		if (nodeA->color == false) //avoiding red parent
 		{
-			removeFix(nodeB);
+			fix(nodeB);
 		}
 		delete nodeA;
 	};
@@ -360,12 +365,16 @@ public:
 		while ((root != nil) && (root != nullptr))
 			remove(root->key);
 		root = nil;
-		count = 0;
+		size = 0;
+	};
+
+	size_t get_size() {
+		return size;
 	};
 
 	T* get_keys() {
 		dft_Iterator i(root, nil);
-		T* arr = new T[count];
+		T* arr = new T[size];
 		int arrI = 0;
 		RBNode* cur;
 		while (i.has_next())
@@ -377,15 +386,15 @@ public:
 		return arr;
 	};
 
-	T* get_values() {
+	T* get_data() {
 		dft_Iterator i(root, nil);
-		T* arr = new T[count];
+		T* arr = new T[size];
 		int arrI = 0;
 		RBNode* cur;
 		while (i.has_next())
 		{
 			cur = i.next();
-			arr[arrI] = cur->value;
+			arr[arrI] = cur->data;
 			arrI++;
 		}
 		return arr;
