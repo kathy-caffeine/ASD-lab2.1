@@ -14,10 +14,10 @@ private:
 		RBNode(T data, T key, bool color, RBNode* parent, RBNode* left, RBNode* right) {
 			this->data = data;
 			this->key = key;
-			this->parent = nullptr;
-			this->left = nullptr;
-			this->right = nullptr;
-			this->color = true; // red
+			this->parent = parent;
+			this->left = left;
+			this->right = right;
+			this->color = color; // red
 		};
 		~RBNode() {};
 		T data;
@@ -222,26 +222,32 @@ public:
 				else
 					parent = parent->left;
 			}
-			newNode->parent = leaf; 
-			if (leaf->key < newNode->key)
-				leaf->right = newNode;
-			else
-				leaf->left = newNode;
-			coloring(newNode);
+			newNode->parent = leaf;
+			if (leaf != nullptr){
+				if (leaf->key < newNode->key)
+					leaf->right = newNode;
+				else
+					leaf->left = newNode;
+				coloring(newNode);
+			}
 		}
 		size++;
 	};
 
 	RBNode* find(T key) {
 		RBNode* x = root;
-		while ((x != nullptr) || (key != x->key)) {
-			if (x->key > key) {
-				x = x->left;
+		while (x->key != key)// find key to remove
+		{
+			if ((x == nil) || (x == nullptr))
+			{
+				throw out_of_range("Element not found");
 			}
-			else {
+			if (x->key < key)
 				x = x->right;
-			}
+			else
+				x = x->left;
 		}
+
 		return x;
 	};
 
